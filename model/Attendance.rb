@@ -1,20 +1,31 @@
 $:<< File.dirname(File.expand_path(__FILE__))
-require 'Base'
+
+require 'common/Base'
 require 'json'
 require 'pp'
 
 class Attendance < Base
-  attr_accessor :name, :college
+
+  # attr_reader :name, :college,
+
   ATTENDANCE_DB = 'attendance'
   USERS_COLL = 'users'
 
   def initialize()
     begin
-      @mongoAttendanceDB = Database::MONGO.new().getConnected({'hosts' => ["127.0.0.1"]}, ATTENDANCE_DB)
+      @mongoAttendanceDB = Datab::MONGO.new().getConnected({'hosts' => ["127.0.0.1"]}, ATTENDANCE_DB)
+      pp @mongoAttendanceDB
     rescue Exception => e
       pp "#{e.message}"
       raise e.message
     end
+  end
+
+  def validateSave()
+    if true == isNilOrEmpty(@college) && true == isNilOrEmpty(@name)
+      return true
+    end
+    return false
   end
 
   def setname(name)
@@ -23,8 +34,8 @@ class Attendance < Base
     @name = name
   end
 
-  def setfamily(college)
-    return false if false == is(college)
+  def setcollege(college)
+    return false if false == isNilOrEmpty(college)
     return false if college.class != String
     @college = college
   end

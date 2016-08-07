@@ -1,3 +1,5 @@
+$:<< File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
+
 require 'model/Attendance'
 require 'json'
 
