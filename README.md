@@ -14,9 +14,6 @@ It will start the server on port:4567
 4. GET /users.                   
 ![GET users](https://raw.githubusercontent.com/pa1pal/Attendance-API/master/Screenshots/get_users.png)
 
-5. GET /user/:id                                                  
-![GET user](https://raw.githubusercontent.com/pa1pal/Attendance-API/master/Screenshots/get_user.png)
-
 
 ## Gems used
 1. [Sinatra(v1.4.7)](https://github.com/sinatra/sinatra)

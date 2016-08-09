@@ -6,7 +6,7 @@ require 'pp'
 
 class Attendance < Base
 
-  # attr_reader :name, :college,
+  # attr_reader :username, :name, :college,
 
   ATTENDANCE_DB = 'attendance'
   USERS_COLL = 'users'
@@ -22,7 +22,7 @@ class Attendance < Base
   end
 
   def validateSave()
-    if true == isNilOrEmpty(@college) && true == isNilOrEmpty(@name)
+    if true == isNilOrEmpty(@name) && true ==  isNilOrEmpty(@college) && true == isNilOrEmpty(@username)
       return true
     end
     return false
@@ -40,6 +40,12 @@ class Attendance < Base
     @college = college
   end
 
+  def setusername(username)
+    return false if false == isNilOrEmpty(username)
+    return false if username.class != String
+    @username = username
+  end
+
   def isNilOrEmpty(val)
     return false if val.nil? or val.empty?
     return true
@@ -51,6 +57,7 @@ class Attendance < Base
       obj = JSON.load(self.to_json)
       id = @mongoAttendanceDB[USERS_COLL].insert_one(obj)
       obj[:id] = id.inserted_id.to_s
+      # obj[:username] = username.to_s
       return obj
     rescue Exception => e
       pp "save #{e.message}"
@@ -58,29 +65,37 @@ class Attendance < Base
     return false
   end
 
+  def getid(username)
+    @mongoAttendanceDB[USERS_COLL].find()
+  end
+
   def get(id)
     begin
       record = nil
       raise if true == id.nil?
-      @mongoAttendanceDB[USERS_COLL].find(:_id => BSON::ObjectId.from_string(id.to_s)).each { |doc|
-        doc[:id] = doc[:_id].to_s
-        doc.delete("_id")
+      #doc = @mongoAttendanceDB[USERS_COLL].find(:_id => BSON::ObjectId.from_string(id.to_s)).each
+      doc = @mongoAttendanceDB[USERS_COLL].find({"name":"Sagar"}).first
+      #{ |doc|
+      #@mongoAttendanceDB[USERS_COLL].find(:_id => BSON::ObjectId.from_string(id.to_s)).each { |doc|
+      #@mongoAttendanceDB[USERS_COLL].find("username" : id) { |doc|
+      #@doc = @mongoAttendanceDB[USERS_COLL].find({"name":"Sagar"})
+        #doc[:username] = doc[:_username].to_s
+        #doc.delete("_id")
         record = doc
-      }
+
     rescue Exception => e
       pp "get #{e.message}"
       return record
     end
     record
-
   end
 
   def getList
     begin
       record = []
-      @mongoAttendanceDB[USERS_COLL].find().projection(:_id => 1).each { |doc|
-        record.push(doc[:_id].to_s)
-      }
+      @mongoAttendanceDB[USERS_COLL].find().each { |doc|
+        record.push(doc[:username].to_s)
+        }
     rescue Exception => e
       pp "getList #{e.message}"
     end
