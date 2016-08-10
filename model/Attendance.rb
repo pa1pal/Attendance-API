@@ -41,9 +41,19 @@ class Attendance < Base
   end
 
   def setusername(username)
-    return false if false == isNilOrEmpty(username)
-    return false if username.class != String
-    @username = username
+    begin
+      return false if false == isNilOrEmpty(username)
+      return false if username.class != String
+      #raise ("Username is already there")
+      if @mongoAttendanceDB[USERS_COLL].find({:username => username}).count() > 0
+        raise "Username is already there"
+        # if @mongoAttendanceDB[USERS_COLL].find({"username":username}).count() > 0 => e
+      end
+      @username = username
+    rescue
+      #raise '{"Username is already there"}'
+      raise 'I am rescued.'
+    end
   end
 
   def isNilOrEmpty(val)
