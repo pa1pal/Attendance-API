@@ -4,110 +4,61 @@ require 'common/Base'
 require 'json'
 require 'pp'
 
+
 class Attendance < Base
-
-  # attr_reader :username, :name, :college,
-
   ATTENDANCE_DB = 'attendance'
   USERS_COLL = 'users'
 
   def initialize()
-    begin
-      @mongoAttendanceDB = Datab::MONGO.new().getConnected({'hosts' => ["127.0.0.1"]}, ATTENDANCE_DB)
-      pp @mongoAttendanceDB
-    rescue Exception => e
-      pp "#{e.message}"
-      raise e.message
-    end
+    client = Mongo::Client.new([ '127.0.0.1:27017' ], :database => ATTENDANCE_DB)
+    @collection = client[USERS_COLL]
   end
 
   def validateSave()
-    if true == isNilOrEmpty(@name) && true ==  isNilOrEmpty(@college) && true == isNilOrEmpty(@username)
-      return true
+    if isNilOrEmpty(@name) or isNilOrEmpty(@college) or isNilOrEmpty(@username)
+      raise 'Validation Error'
     end
-    return false
   end
 
   def setname(name)
-    return false if false == isNilOrEmpty(name)
-    return false if name.class != String
     @name = name
   end
 
   def setcollege(college)
-    return false if false == isNilOrEmpty(college)
-    return false if college.class != String
     @college = college
   end
 
   def setusername(username)
-    begin
-      return false if false == isNilOrEmpty(username)
-      return false if username.class != String
-      #raise ("Username is already there")
-      if @mongoAttendanceDB[USERS_COLL].find({:username => username}).count() > 0
-        raise "Username is already there"
-        # if @mongoAttendanceDB[USERS_COLL].find({"username":username}).count() > 0 => e
-      end
-      @username = username
-    rescue
-      #raise '{"Username is already there"}'
-      raise 'I am rescued.'
+    if @collection.find(:username => username).count > 0
+      raise "Username is already there"
     end
+    @username = username
   end
 
   def isNilOrEmpty(val)
-    return false if val.nil? or val.empty?
-    return true
+    return (val.nil? or val.empty?)
   end
 
   def save()
-    begin
-      raise if false == self.validateSave()
-      obj = JSON.load(self.to_json)
-      id = @mongoAttendanceDB[USERS_COLL].insert_one(obj)
-      obj[:id] = id.inserted_id.to_s
-      # obj[:username] = username.to_s
-      return obj
-    rescue Exception => e
-      pp "save #{e.message}"
-    end
-    return false
+    validateSave()
+    obj = JSON.load(self.to_json)
+    return @collection.insert_one(obj)
   end
 
   def getid(username)
-    @mongoAttendanceDB[USERS_COLL].find()
+    @collection.find()
   end
 
-  def get(id)
-    begin
-      record = nil
-      raise if true == id.nil?
-      #doc = @mongoAttendanceDB[USERS_COLL].find(:_id => BSON::ObjectId.from_string(id.to_s)).each
-      doc = @mongoAttendanceDB[USERS_COLL].find({"name":"Sagar"}).first
-      #{ |doc|
-      #@mongoAttendanceDB[USERS_COLL].find(:_id => BSON::ObjectId.from_string(id.to_s)).each { |doc|
-      #@mongoAttendanceDB[USERS_COLL].find("username" : id) { |doc|
-      #@doc = @mongoAttendanceDB[USERS_COLL].find({"name":"Sagar"})
-        #doc[:username] = doc[:_username].to_s
-        #doc.delete("_id")
-        record = doc
-
-    rescue Exception => e
-      pp "get #{e.message}"
-      return record
-    end
+  def get(key)
+    record = @collection.find(:username => key).first
+    raise "User `#{key}' does not exist." if record.nil?
     record
   end
 
   def getList
-    begin
-      record = []
-      @mongoAttendanceDB[USERS_COLL].find().each { |doc|
-        record.push(doc[:username].to_s)
-        }
-    rescue Exception => e
-      pp "getList #{e.message}"
+    record = []
+    @collection.find.each do |doc|
+      record.push(doc[:username].to_s)
     end
     record
   end

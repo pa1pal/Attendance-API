@@ -11,19 +11,19 @@ class AttendanceService
   def initialize()
     begin
       @userObj = Attendance.new()
-    rescue Exception => e
+    rescue => e
       raise DB_ERROR_MESSAGE
     end
   end
 
   def post(jsonString)
-    if false != @userObj.from_json!(jsonString)
-      response = @userObj.save()
-      if false != response
-        return 201, response.to_json
-      end
+    begin
+      @userObj.from_json!(jsonString)
+      @userObj.save()
+      return 201, @userObj.to_json
+    rescue => e
+      return 400, e.message
     end
-    return 400
   end
 
   def getUsers()
@@ -32,11 +32,11 @@ class AttendanceService
   end
 
   def getUser(id)
-    response = @userObj.get(id)
-    if true == response.nil?
-      return 404
-    else
+    begin
+      response = @userObj.get(id)
       return 200, response.to_json
+    rescue => e
+      return 404, e.message
     end
   end
 

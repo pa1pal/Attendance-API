@@ -22,14 +22,8 @@ class JSONable
   end
 
   def from_json! string
-    begin
-      JSON.load(string).each do |var, val|
-        raise if false == self.method("set#{var}").call(val)
-        # self.instance_variable_set var, val
-      end
-    rescue Exception => e
-      clearObject()
-      return false
+    JSON.load(string).each do |var, val|
+      self.method("set#{var}").call(val)
     end
   end
 

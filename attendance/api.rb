@@ -10,7 +10,7 @@ get '/users' do
     status code
     content_type :json
     response
-  rescue Exception => e
+  rescue => e
     status 500
     content_type :text
     e.message
@@ -23,7 +23,7 @@ get '/users/:id' do
     status code
     content_type :json
     response
-  rescue Exception => e
+  rescue => e
     status 500
     content_type :text
     e.message
@@ -36,7 +36,7 @@ post '/users' do
     status code
     content_type :json
     response
-  rescue Exception => e
+  rescue => e
     status 500
     content_type :text
     e.message
